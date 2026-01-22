@@ -158,15 +158,119 @@ Generates various reports:
 
 ---
 
-## Next Steps
+## Phase 1.2: Database Migrations
 
-### Phase 1.2: Database Migrations
-- [ ] Create `students` table migration
-- [ ] Create `categories` table migration
-- [ ] Create `books` table migration
-- [ ] Create `transactions` table migration
-- [ ] Create `settings` table migration
-- [ ] Modify `users` table (add role column)
+**Date:** January 2026
+**Status:** Completed
+
+### Migrations Created
+
+| Migration File | Table | Description |
+|----------------|-------|-------------|
+| `add_role_to_users_table` | users | Adds `role` enum column (admin/librarian) |
+| `create_students_table` | students | Student records with grade levels |
+| `create_categories_table` | categories | Book categories |
+| `create_books_table` | books | Book catalog with inventory tracking |
+| `create_transactions_table` | transactions | Borrowing records with fines |
+| `create_settings_table` | settings | Key-value system configuration |
+
+### Database Schema Summary
+
+#### users (modified)
+- Added: `role` enum('admin', 'librarian') default 'librarian'
+
+#### students
+| Column | Type | Description |
+|--------|------|-------------|
+| id | bigint | Primary key |
+| student_id | varchar(50) | Unique school ID |
+| first_name | varchar(100) | Required |
+| last_name | varchar(100) | Required |
+| middle_name | varchar(100) | Nullable |
+| grade_level | enum(1-6) | Grade 1 to 6 |
+| section | varchar(50) | Class section |
+| status | enum | active/inactive/graduated |
+| contact_number | varchar(20) | Nullable |
+| guardian_name | varchar(255) | Nullable |
+| guardian_contact | varchar(20) | Nullable |
+| timestamps | | created_at, updated_at |
+
+**Indexes:** student_id, grade_level, status (composite)
+
+#### categories
+| Column | Type | Description |
+|--------|------|-------------|
+| id | bigint | Primary key |
+| name | varchar(100) | Unique category name |
+| description | text | Nullable |
+| timestamps | | created_at, updated_at |
+
+#### books
+| Column | Type | Description |
+|--------|------|-------------|
+| id | bigint | Primary key |
+| accession_number | varchar(50) | Unique library ID |
+| isbn | varchar(13) | Nullable |
+| title | varchar(255) | Required |
+| author | varchar(255) | Required |
+| publisher | varchar(255) | Nullable |
+| publication_year | year | Nullable |
+| category_id | foreignId | FK to categories |
+| edition | varchar(50) | Nullable |
+| pages | int | Nullable |
+| copies_total | int | Default 1 |
+| copies_available | int | Default 1 |
+| location | varchar(100) | Nullable |
+| condition | enum | excellent/good/fair/poor |
+| description | text | Nullable |
+| cover_image | varchar(255) | Nullable |
+| status | enum | available/unavailable |
+| timestamps | | created_at, updated_at |
+
+**Indexes:** accession_number, isbn, category_id, status (composite)
+
+#### transactions
+| Column | Type | Description |
+|--------|------|-------------|
+| id | bigint | Primary key |
+| student_id | foreignId | FK to students |
+| book_id | foreignId | FK to books |
+| librarian_id | foreignId | FK to users |
+| borrowed_date | date | Required |
+| due_date | date | Required |
+| returned_date | date | Nullable |
+| status | enum | borrowed/returned/overdue |
+| notes | text | Nullable |
+| fine_amount | decimal(8,2) | Default 0.00 |
+| fine_paid | boolean | Default false |
+| timestamps | | created_at, updated_at |
+
+**Indexes:** student_id, book_id, status, due_date, (student_id, status), (student_id, book_id, status, due_date)
+
+#### settings
+| Column | Type | Description |
+|--------|------|-------------|
+| id | bigint | Primary key |
+| key | varchar(100) | Unique setting key |
+| value | text | Setting value |
+| description | varchar(255) | Nullable |
+| timestamps | | created_at, updated_at |
+
+### To Run Migrations
+
+1. Start MySQL in XAMPP Control Panel
+2. Create database:
+   ```sql
+   CREATE DATABASE library_management CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+   ```
+3. Run migrations:
+   ```bash
+   php artisan migrate
+   ```
+
+---
+
+## Next Steps
 
 ### Phase 1.3: Eloquent Models
 - [ ] Create Student model with relationships
