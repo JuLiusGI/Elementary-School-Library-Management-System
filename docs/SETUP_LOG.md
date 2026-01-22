@@ -270,15 +270,163 @@ Generates various reports:
 
 ---
 
+## Phase 1.3: Eloquent Models
+
+**Date:** January 2026
+**Status:** Completed
+
+### Models Created/Updated
+
+| Model | File | Description |
+|-------|------|-------------|
+| User | `app/Models/User.php` | Updated with role, relationships, and helper methods |
+| Student | `app/Models/Student.php` | Student records with borrowing logic |
+| Category | `app/Models/Category.php` | Book categories |
+| Book | `app/Models/Book.php` | Book catalog with availability tracking |
+| Transaction | `app/Models/Transaction.php` | Borrowing records with fine calculation |
+| Setting | `app/Models/Setting.php` | Key-value system configuration |
+
+### Model Features Summary
+
+#### User Model
+- **Fillable:** name, email, password, role
+- **Relationships:** `hasMany(Transaction::class, 'librarian_id')`
+- **Methods:**
+  - `isAdmin()` - Check if user is admin
+  - `isLibrarian()` - Check if user is librarian
+  - `canManageLibrary()` - Check if user can manage library
+
+#### Student Model
+- **Fillable:** student_id, first_name, last_name, middle_name, grade_level, section, status, contact_number, guardian_name, guardian_contact
+- **Casts:** grade_level (string), status (string)
+- **Relationships:** `hasMany(Transaction::class)`
+- **Accessors:**
+  - `full_name` - "Last, First Middle" format
+  - `display_name` - "First Last" format
+  - `grade_display` - "Grade X" format
+- **Scopes:**
+  - `scopeActive()` - Filter active students
+  - `scopeInGrade($grade)` - Filter by grade level
+  - `scopeSearch($term)` - Search by name or ID
+- **Methods:**
+  - `canBorrow()` - Check if student can borrow more books
+  - `currentBorrowedBooks()` - Get currently borrowed books
+  - `remainingBorrowingCapacity()` - Get remaining borrowing slots
+  - `totalFines()` - Calculate total unpaid fines
+  - `hasUnpaidFines()` - Check for unpaid fines
+  - `hasOverdueBooks()` - Check for overdue books
+
+#### Category Model
+- **Fillable:** name, description
+- **Relationships:** `hasMany(Book::class)`
+- **Methods:**
+  - `bookCount()` - Count books in category
+  - `availableBookCount()` - Count available books
+  - `hasBooks()` - Check if category has books
+
+#### Book Model
+- **Fillable:** accession_number, isbn, title, author, publisher, publication_year, category_id, edition, pages, copies_total, copies_available, location, condition, description, cover_image, status
+- **Casts:** publication_year (integer), copies_total (integer), copies_available (integer), pages (integer)
+- **Relationships:**
+  - `belongsTo(Category::class)`
+  - `hasMany(Transaction::class)`
+- **Scopes:**
+  - `scopeAvailable()` - Filter available books
+  - `scopeUnavailable()` - Filter unavailable books
+  - `scopeInCategory($id)` - Filter by category
+  - `scopeSearch($term)` - Search by title, author, ISBN
+  - `scopeInCondition($condition)` - Filter by condition
+- **Methods:**
+  - `isAvailable()` - Check availability
+  - `decrementCopy()` - Decrease available copies (when borrowed)
+  - `incrementCopy()` - Increase available copies (when returned)
+  - `copiesBorrowed()` - Get count of borrowed copies
+- **Accessors:**
+  - `cover_image_url` - Full URL to cover image
+  - `publication_info` - Formatted publisher and year
+
+#### Transaction Model
+- **Fillable:** student_id, book_id, librarian_id, borrowed_date, due_date, returned_date, status, notes, fine_amount, fine_paid
+- **Casts:** borrowed_date (date), due_date (date), returned_date (date), fine_amount (decimal:2), fine_paid (boolean)
+- **Relationships:**
+  - `belongsTo(Student::class)`
+  - `belongsTo(Book::class)`
+  - `belongsTo(User::class, 'librarian_id')`
+- **Scopes:**
+  - `scopeBorrowed()` - Currently borrowed
+  - `scopeReturned()` - Returned transactions
+  - `scopeOverdue()` - Overdue transactions
+  - `scopeActive()` - Not yet returned (borrowed or overdue)
+  - `scopeWithUnpaidFines()` - Has unpaid fines
+  - `scopeDueOn($date)` - Due on specific date
+  - `scopeDueBefore($date)` - Due before date
+- **Methods:**
+  - `isOverdue()` - Check if overdue
+  - `daysOverdue()` - Calculate days overdue
+  - `calculateFine()` - Calculate fine amount
+  - `markAsReturned($date)` - Mark as returned
+  - `markFinePaid()` - Mark fine as paid
+  - `hasUnpaidFine()` - Check for unpaid fine
+- **Accessors:**
+  - `status_label` - Human-readable status
+  - `status_color` - CSS class for status badge
+  - `formatted_fine` - Fine with PHP currency symbol
+  - `days_until_due` - Days until/since due date
+
+#### Setting Model
+- **Fillable:** key, value, description
+- **Static Methods:**
+  - `get($key, $default)` - Get setting value (with caching)
+  - `set($key, $value, $description)` - Set setting value
+  - `has($key)` - Check if setting exists
+  - `remove($key)` - Delete setting
+  - `getAll()` - Get all settings as array
+  - `getMany($keys, $defaults)` - Get multiple settings
+  - `clearCache()` - Clear settings cache
+- **Type-Specific Getters:**
+  - `getInt($key, $default)` - Get as integer
+  - `getFloat($key, $default)` - Get as float
+  - `getBool($key, $default)` - Get as boolean
+- **Library Convenience Methods:**
+  - `maxBooksPerStudent()` - Get max books setting
+  - `borrowingPeriod()` - Get borrowing period setting
+  - `finePerDay()` - Get fine per day setting
+  - `gracePeriod()` - Get grace period setting
+  - `schoolName()` - Get school name setting
+
+---
+
+## Phase 1 Complete
+
+All Phase 1 tasks have been completed:
+- [x] Phase 1.1: Project Initialization & Setup
+- [x] Phase 1.2: Database Migrations
+- [x] Phase 1.3: Eloquent Models
+
+### To Run the Application
+
+1. Start MySQL and Apache in XAMPP Control Panel
+2. Create the database:
+   ```sql
+   CREATE DATABASE library_management CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+   ```
+3. Run migrations:
+   ```bash
+   php artisan migrate
+   ```
+4. Access the application: `http://localhost/bes_library_sys/public`
+
+---
+
 ## Next Steps
 
-### Phase 1.3: Eloquent Models
-- [ ] Create Student model with relationships
-- [ ] Create Category model with relationships
-- [ ] Create Book model with relationships
-- [ ] Create Transaction model with relationships
-- [ ] Create Setting model with helper methods
-- [ ] Update User model with role and relationships
+### Phase 2: Core Functionality
+- [ ] Create database seeders for initial data
+- [ ] Build Book Management (CRUD)
+- [ ] Build Student Management (CRUD)
+- [ ] Build Category Management (CRUD)
+- [ ] Implement Borrowing System
+- [ ] Implement Return System
 
 ---
 
