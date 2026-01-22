@@ -22,7 +22,7 @@
         <meta name="csrf-token" content="{{ csrf_token() }}">
 
         {{-- Page title - shows "Page Name - App Name" format --}}
-        <title>{{ config('app.name', 'Library Management System') }}</title>
+        <title>@yield('title', 'Dashboard') - {{ config('app.name', 'Library Management System') }}</title>
 
         {{-- Fonts - Figtree for clean, readable text --}}
         <link rel="preconnect" href="https://fonts.bunny.net">
@@ -351,9 +351,16 @@
                     {{--
                         MAIN CONTENT
                         This is where the page content from child views is rendered
+                        Supports both:
+                        - Blade components: {{ $slot }}
+                        - Traditional views: @yield('content')
                     --}}
-                    <main class="flex-1 p-4 sm:p-6 lg:p-8">
-                        {{ $slot }}
+                    <main class="flex-1">
+                        @hasSection('content')
+                            @yield('content')
+                        @else
+                            {{ $slot ?? '' }}
+                        @endif
                     </main>
 
                     {{--

@@ -418,15 +418,108 @@ All Phase 1 tasks have been completed:
 
 ---
 
+## Phase 2.1: Student CRUD Management
+
+**Date:** January 2026
+**Status:** Completed
+
+### Features Implemented
+
+#### 1. Student Management System
+Complete CRUD functionality for managing student records with:
+- Searchable, filterable, and sortable student table (Livewire)
+- Create, edit, and delete student records
+- Student details page with borrowing history
+- Statistics dashboard cards
+
+#### 2. Files Created
+
+| File | Type | Description |
+|------|------|-------------|
+| `app/Http/Controllers/StudentController.php` | Controller | Resource controller with all CRUD methods |
+| `app/Http/Requests/StudentRequest.php` | Form Request | Validation rules for student forms |
+| `app/Livewire/StudentSearchTable.php` | Livewire | Real-time search and filter component |
+| `resources/views/livewire/student-search-table.blade.php` | View | Livewire component view |
+| `resources/views/students/index.blade.php` | View | Student list with statistics cards |
+| `resources/views/students/create.blade.php` | View | New student registration form |
+| `resources/views/students/edit.blade.php` | View | Edit student form |
+| `resources/views/students/show.blade.php` | View | Student details and history |
+| `database/migrations/..._add_soft_deletes_to_students_table.php` | Migration | Adds soft delete support |
+
+#### 3. Files Modified
+
+| File | Changes |
+|------|---------|
+| `app/Models/Student.php` | Added SoftDeletes trait |
+| `resources/views/layouts/app.blade.php` | Added @yield('content') support and @yield('title') |
+| `routes/web.php` | Added student resource routes and placeholder routes |
+
+### StudentController Methods
+
+| Method | Route | Description |
+|--------|-------|-------------|
+| `index()` | GET /students | List students with statistics |
+| `create()` | GET /students/create | Show create form |
+| `store()` | POST /students | Save new student |
+| `show()` | GET /students/{id} | View student details |
+| `edit()` | GET /students/{id}/edit | Show edit form |
+| `update()` | PUT /students/{id} | Update student |
+| `destroy()` | DELETE /students/{id} | Soft delete student |
+
+### StudentRequest Validation Rules
+
+| Field | Rules |
+|-------|-------|
+| student_id | required, unique, max:50 |
+| first_name | required, max:100 |
+| last_name | required, max:100 |
+| middle_name | nullable, max:100 |
+| grade_level | required, in:1,2,3,4,5,6 |
+| section | required, max:50 |
+| status | nullable, in:active,inactive,graduated |
+| contact_number | nullable, max:20 |
+| guardian_name | nullable, max:255 |
+| guardian_contact | nullable, max:20 |
+
+### Livewire StudentSearchTable Features
+
+- Real-time search by name or student ID (with debounce)
+- Filter by grade level, section, and status
+- Sortable columns (click header to sort)
+- Pagination (15 per page)
+- URL query string sync (bookmarkable filters)
+- Delete confirmation dialog
+- Loading indicators
+
+### Statistics Dashboard Cards
+
+1. **Total Students**: Count of all registered students
+2. **Active Students**: Students with 'active' status
+3. **With Borrowed Books**: Students currently borrowing books
+4. **With Unpaid Fines**: Students with outstanding fines
+
+### Soft Delete Implementation
+
+Students use soft deletes to:
+- Preserve borrowing history when students leave
+- Allow recovery of accidentally deleted records
+- Maintain data integrity for reporting
+
+Use these methods with soft-deleted students:
+- `Student::withTrashed()->get()` - Include deleted
+- `Student::onlyTrashed()->get()` - Only deleted
+- `$student->restore()` - Recover deleted student
+
+---
+
 ## Next Steps
 
-### Phase 2: Core Functionality
+### Phase 2.2: Book & Category Management
+- [ ] Create Category CRUD (simple management)
+- [ ] Create Book CRUD with category relationship
+- [ ] Add book cover image upload
+- [ ] Add ISBN lookup/validation
 - [ ] Create database seeders for initial data
-- [ ] Build Book Management (CRUD)
-- [ ] Build Student Management (CRUD)
-- [ ] Build Category Management (CRUD)
-- [ ] Implement Borrowing System
-- [ ] Implement Return System
 
 ---
 

@@ -30,17 +30,26 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Student extends Model
 {
     /**
      * Use HasFactory trait to enable model factories for testing.
+     * Use SoftDeletes trait to enable soft delete functionality.
      *
      * Factories allow you to create fake student data for testing:
      * Student::factory()->create(); // Creates a student in database
      * Student::factory()->make();   // Creates student instance without saving
+     *
+     * Soft Deletes:
+     * - $student->delete() sets deleted_at timestamp instead of removing record
+     * - Student::withTrashed()->get() includes deleted students
+     * - Student::onlyTrashed()->get() gets only deleted students
+     * - $student->restore() recovers a deleted student
+     * - $student->forceDelete() permanently removes the record
      */
-    use HasFactory;
+    use HasFactory, SoftDeletes;
 
     /**
      * The attributes that are mass assignable.
