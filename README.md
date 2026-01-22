@@ -413,9 +413,18 @@ This project is developed for Bobon B Elementary School. All rights reserved.
 - Soft delete support for students
 - Form validation with custom error messages
 
-#### Phase 2.2 - In Progress
-- Book catalog management
-- Category management
+#### Phase 2.2 - Completed (January 2026)
+- Book catalog with grid/list view toggle
+- Category management with inline editing
+- Cover image upload (max 2MB)
+- Auto-generated accession numbers (YEAR-#### format)
+- Color-coded availability indicators
+- Book statistics dashboard
+- Borrowing history on book detail pages
+
+#### Phase 3 - Pending
+- Borrowing system
+- Return system with fine calculation
 
 ---
 

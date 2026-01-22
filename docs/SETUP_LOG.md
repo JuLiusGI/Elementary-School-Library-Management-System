@@ -512,14 +512,168 @@ Use these methods with soft-deleted students:
 
 ---
 
+## Phase 2.2: Book & Category Management
+
+**Date:** January 2026
+**Status:** Completed
+
+### Features Implemented
+
+#### 1. Category Management System
+Simple CRUD for organizing books into categories:
+- Inline category management on single page
+- Add new category form
+- Edit categories with Alpine.js inline editing
+- Delete with book association check
+- Shows book count per category
+
+#### 2. Book Catalog System
+Complete book management with:
+- Searchable, filterable catalog (Livewire)
+- Grid and list view toggle
+- Color-coded availability indicators
+- Book cover image upload (max 2MB)
+- Auto-generated accession numbers (YEAR-#### format)
+- Statistics dashboard
+- Current borrowers display
+- Borrowing history with pagination
+
+#### 3. Files Created
+
+| File | Type | Description |
+|------|------|-------------|
+| `app/Http/Controllers/CategoryController.php` | Controller | Category CRUD operations |
+| `app/Http/Controllers/BookController.php` | Controller | Book CRUD with image handling |
+| `app/Http/Requests/CategoryRequest.php` | Form Request | Category validation rules |
+| `app/Http/Requests/BookRequest.php` | Form Request | Book validation with image rules |
+| `app/Livewire/BookSearchCatalog.php` | Livewire | Real-time search and filter component |
+| `resources/views/livewire/book-search-catalog.blade.php` | View | Catalog component with grid/list views |
+| `resources/views/categories/index.blade.php` | View | Category management page |
+| `resources/views/books/index.blade.php` | View | Book catalog with statistics |
+| `resources/views/books/create.blade.php` | View | Add book form with image upload |
+| `resources/views/books/edit.blade.php` | View | Edit book form |
+| `resources/views/books/show.blade.php` | View | Book details with borrowing history |
+
+#### 4. Files Modified
+
+| File | Changes |
+|------|---------|
+| `routes/web.php` | Added category and book resource routes, cover removal route |
+
+### CategoryController Methods
+
+| Method | Route | Description |
+|--------|-------|-------------|
+| `index()` | GET /categories | List all categories with book counts |
+| `create()` | GET /categories/create | Show create form |
+| `store()` | POST /categories | Save new category |
+| `show()` | GET /categories/{id} | View category with its books |
+| `edit()` | GET /categories/{id}/edit | Show edit form |
+| `update()` | PUT /categories/{id} | Update category |
+| `destroy()` | DELETE /categories/{id} | Delete category (if no books) |
+
+### BookController Methods
+
+| Method | Route | Description |
+|--------|-------|-------------|
+| `index()` | GET /books | Book catalog with statistics |
+| `create()` | GET /books/create | Show create form |
+| `store()` | POST /books | Save new book (with image upload) |
+| `show()` | GET /books/{id} | View book details and history |
+| `edit()` | GET /books/{id}/edit | Show edit form |
+| `update()` | PUT /books/{id} | Update book (replace image if new) |
+| `destroy()` | DELETE /books/{id} | Delete book (if no active transactions) |
+| `removeCover()` | DELETE /books/{id}/cover | Remove cover image only |
+
+### CategoryRequest Validation Rules
+
+| Field | Rules |
+|-------|-------|
+| name | required, unique, max:100 |
+| description | nullable, max:500 |
+
+### BookRequest Validation Rules
+
+| Field | Rules |
+|-------|-------|
+| accession_number | nullable on create (auto-generate), required on update, unique, max:50 |
+| title | required, max:255 |
+| author | required, max:255 |
+| category_id | required, exists in categories |
+| copies_total | required, integer, min:1 |
+| copies_available | required, integer, min:0, <= copies_total |
+| isbn | nullable, max:13 |
+| publisher | nullable, max:255 |
+| publication_year | nullable, integer, 1800-current year |
+| edition | nullable, max:50 |
+| pages | nullable, integer, min:1 |
+| location | nullable, max:100 |
+| condition | nullable, in:excellent,good,fair,poor |
+| description | nullable, max:2000 |
+| status | nullable, in:available,unavailable |
+| cover_image | nullable, image, mimes:jpeg,jpg,png,gif,webp, max:2048 (2MB) |
+
+### Livewire BookSearchCatalog Features
+
+- Real-time search by title, author, ISBN, accession number (debounced)
+- Filter by category, status, and condition
+- Sort by title, author, accession number, availability, date added
+- Grid view (card layout with cover images)
+- List view (table format)
+- Pagination (12 per page)
+- URL query string sync (bookmarkable filters)
+- Color-coded availability:
+  - Green: Available (3+ copies)
+  - Yellow: Limited (1-2 copies)
+  - Red: All borrowed (0 copies)
+  - Gray: Unavailable (lost/withdrawn)
+
+### Statistics Dashboard Cards
+
+1. **Book Titles**: Total number of unique book titles
+2. **Total Copies**: Sum of all copies owned
+3. **Available**: Copies currently available for borrowing
+4. **Borrowed**: Copies currently checked out
+
+### Books by Category Chart
+
+- Bar chart showing top 5 categories
+- Displays book count and percentage
+
+### Accession Number Auto-Generation
+
+Format: `YEAR-####` (e.g., 2026-0001, 2026-0002)
+- Automatically generated if not provided during creation
+- Sequential numbering within each year
+- Zero-padded to 4 digits
+
+### Image Upload Handling
+
+- Stored in: `storage/app/public/book-covers/`
+- Accessible via: `/storage/book-covers/filename`
+- Unique filename: `timestamp_uniqid.extension`
+- Old images deleted when replaced or removed
+- Supports: JPEG, JPG, PNG, GIF, WebP
+- Max size: 2MB
+
+---
+
+## Phase 2 Complete
+
+All Phase 2 tasks have been completed:
+- [x] Phase 2.1: Student CRUD Management
+- [x] Phase 2.2: Book & Category Management
+
+---
+
 ## Next Steps
 
-### Phase 2.2: Book & Category Management
-- [ ] Create Category CRUD (simple management)
-- [ ] Create Book CRUD with category relationship
-- [ ] Add book cover image upload
-- [ ] Add ISBN lookup/validation
-- [ ] Create database seeders for initial data
+### Phase 3: Borrowing System
+- [ ] Create borrow book form with student/book search
+- [ ] Create return book form with fine calculation
+- [ ] Create transaction history view
+- [ ] Add overdue book notifications
+- [ ] Implement borrowing limits and validation
 
 ---
 

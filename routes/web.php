@@ -17,6 +17,8 @@
 
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\StudentController;
+use App\Http\Controllers\BookController;
+use App\Http\Controllers\CategoryController;
 use Illuminate\Support\Facades\Route;
 
 // =========================================================================
@@ -66,19 +68,28 @@ Route::middleware('auth')->group(function () {
     // - DELETE /students/{id}      -> destroy (delete)
     Route::resource('students', StudentController::class);
 
+    // ===== CATEGORY ROUTES =====
+    // Category management for organizing books
+    // Route::resource creates all standard CRUD routes:
+    // - GET    /categories           -> index   (list all)
+    // - GET    /categories/create    -> create  (show form)
+    // - POST   /categories           -> store   (save new)
+    // - GET    /categories/{id}      -> show    (view one)
+    // - GET    /categories/{id}/edit -> edit    (show edit form)
+    // - PUT    /categories/{id}      -> update  (save changes)
+    // - DELETE /categories/{id}      -> destroy (delete)
+    Route::resource('categories', CategoryController::class);
+
+    // ===== BOOK ROUTES =====
+    // Book catalog management (CRUD operations)
+    Route::resource('books', BookController::class);
+
+    // Additional book route for removing cover image
+    Route::delete('/books/{book}/cover', [BookController::class, 'removeCover'])->name('books.remove-cover');
+
     // ===== PLACEHOLDER ROUTES =====
     // These routes will be implemented in future phases
     // They are defined here to prevent errors in the sidebar navigation
-
-    // Books routes (Phase 2.2)
-    Route::get('/books', function () {
-        return redirect()->route('dashboard')->with('warning', 'Books management coming soon!');
-    })->name('books.index');
-
-    // Categories routes (Phase 2.2)
-    Route::get('/categories', function () {
-        return redirect()->route('dashboard')->with('warning', 'Categories management coming soon!');
-    })->name('categories.index');
 
     // Transaction routes (Phase 3)
     Route::get('/transactions/borrow', function () {
