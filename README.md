@@ -249,8 +249,7 @@ bes_library_sys/
 ├── storage/
 │   └── app/public/             # Uploaded files (book covers)
 ├── docs/
-│   ├── TECHNICAL_SPEC.md       # Technical specification
-│   └── AGENT_RULES.md          # Development guidelines
+│   └── SETUP_LOG.md            # Development progress log
 └── tests/                      # Automated tests
 ```
 
@@ -377,8 +376,7 @@ php artisan config:clear
 
 | Document | Description |
 |----------|-------------|
-| [Technical Specification](docs/TECHNICAL_SPEC.md) | Complete project requirements, database schema, features |
-| [Agent Rules](docs/AGENT_RULES.md) | Development guidelines, coding standards, workflows |
+| [Setup Log](docs/SETUP_LOG.md) | Development progress and setup documentation |
 
 ---
 
@@ -386,7 +384,7 @@ php artisan config:clear
 
 For issues and questions:
 1. Check the [Troubleshooting](#troubleshooting) section
-2. Review the documentation in `/docs` folder
+2. Review the [Setup Log](docs/SETUP_LOG.md) for development details
 3. Contact the system administrator
 
 ---
@@ -399,11 +397,25 @@ This project is developed for Bobon B Elementary School. All rights reserved.
 
 ## Changelog
 
-### Version 1.0.0 (January 2026)
-- Initial release
-- Core features: Student management, Book catalog, Borrowing/Return system
-- Reports and PDF export
-- Role-based access control
+### Version 1.0.0 (In Development)
+
+#### Phase 1 - Completed (January 2026)
+- Project initialization with Laravel 12
+- Database migrations for all tables (users, students, books, categories, transactions, settings)
+- Eloquent models with relationships and helper methods
+- Custom Tailwind CSS color scheme
+- Layout templates with sidebar navigation
+
+#### Phase 2.1 - Completed (January 2026)
+- Student CRUD management
+- Livewire-powered search table with real-time filtering
+- Student statistics dashboard
+- Soft delete support for students
+- Form validation with custom error messages
+
+#### Phase 2.2 - In Progress
+- Book catalog management
+- Category management
 
 ---
 
