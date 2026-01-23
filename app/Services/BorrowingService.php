@@ -64,7 +64,7 @@ class BorrowingService
     {
         // Get the maximum books allowed per student from settings
         // Default is 3 if not configured
-        $maxBooks = Setting::getValue('max_books_per_student', 3);
+        $maxBooks = Setting::getInt('max_books_per_student', 3);
 
         // Count how many books the student currently has borrowed
         $currentBorrowed = $student->transactions()
@@ -154,7 +154,7 @@ class BorrowingService
         // Step 3: Calculate due date if not provided
         if (!$dueDate) {
             // Get borrowing period from settings (default: 7 days)
-            $borrowingPeriod = Setting::getValue('borrowing_period', 7);
+            $borrowingPeriod = Setting::getInt('borrowing_period', 7);
             $dueDate = Carbon::now()->addDays($borrowingPeriod);
         }
 
@@ -267,7 +267,7 @@ class BorrowingService
      */
     public function getRemainingBorrowingCapacity(Student $student): int
     {
-        $maxBooks = Setting::getValue('max_books_per_student', 3);
+        $maxBooks = Setting::getInt('max_books_per_student', 3);
         $currentBorrowed = $student->transactions()
             ->whereIn('status', ['borrowed', 'overdue'])
             ->count();

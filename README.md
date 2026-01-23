@@ -422,9 +422,19 @@ This project is developed for Bobon B Elementary School. All rights reserved.
 - Book statistics dashboard
 - Borrowing history on book detail pages
 
-#### Phase 3 - Pending
-- Borrowing system
-- Return system with fine calculation
+#### Phase 3.1 - Completed (January 2026)
+- Multi-step book borrowing form (Livewire)
+- Student eligibility checking (max books, overdue, unpaid fines)
+- Book return processing with condition updates
+- Automatic fine calculation (grace period + daily rate)
+- Transaction history with filtering and pagination
+- Fine payment and waiver functionality
+- Real-time search for borrowed books
+
+#### Phase 3.2 - Pending
+- Enhanced fine management features
+- Bulk return processing
+- Overdue notifications
 
 ---
 

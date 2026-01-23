@@ -74,8 +74,8 @@ class FineCalculationService
 
         // Get fine settings from database
         // These can be changed by admin without modifying code
-        $finePerDay = (float) Setting::getValue('fine_per_day', 5.00);
-        $gracePeriod = (int) Setting::getValue('grace_period', 1);
+        $finePerDay = Setting::getFloat('fine_per_day', 5.00);
+        $gracePeriod = Setting::getInt('grace_period', 1);
 
         // Calculate chargeable days (subtract grace period, minimum 0)
         // Example: If 3 days overdue with 1 day grace = 2 chargeable days
@@ -141,8 +141,8 @@ class FineCalculationService
     public function getFinePolicy(): array
     {
         return [
-            'fine_per_day' => (float) Setting::getValue('fine_per_day', 5.00),
-            'grace_period' => (int) Setting::getValue('grace_period', 1),
+            'fine_per_day' => Setting::getFloat('fine_per_day', 5.00),
+            'grace_period' => Setting::getInt('grace_period', 1),
             'currency' => '₱', // Philippine Peso
         ];
     }

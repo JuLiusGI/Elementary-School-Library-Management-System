@@ -19,6 +19,7 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\StudentController;
 use App\Http\Controllers\BookController;
 use App\Http\Controllers\CategoryController;
+use App\Http\Controllers\TransactionController;
 use Illuminate\Support\Facades\Route;
 
 // =========================================================================
@@ -87,22 +88,31 @@ Route::middleware('auth')->group(function () {
     // Additional book route for removing cover image
     Route::delete('/books/{book}/cover', [BookController::class, 'removeCover'])->name('books.remove-cover');
 
+    // ===== TRANSACTION ROUTES (Phase 3) =====
+    // Book borrowing, returns, and transaction history
+
+    // Borrow book routes
+    Route::get('/transactions/borrow', [TransactionController::class, 'borrowIndex'])->name('transactions.borrow');
+    Route::post('/transactions/borrow', [TransactionController::class, 'borrowStore'])->name('transactions.borrow.store');
+
+    // Return book routes
+    Route::get('/transactions/return', [TransactionController::class, 'returnIndex'])->name('transactions.return');
+    Route::post('/transactions/return', [TransactionController::class, 'returnStore'])->name('transactions.return.store');
+
+    // Transaction history
+    Route::get('/transactions', [TransactionController::class, 'history'])->name('transactions.index');
+    Route::get('/transactions/history', [TransactionController::class, 'history'])->name('transactions.history');
+
+    // Fine management routes
+    Route::post('/transactions/{transaction}/pay-fine', [TransactionController::class, 'payFine'])->name('transactions.pay-fine');
+    Route::post('/transactions/{transaction}/waive-fine', [TransactionController::class, 'waiveFine'])->name('transactions.waive-fine');
+
+    // API-style routes for Livewire components
+    Route::get('/transactions/check-student/{student}', [TransactionController::class, 'checkStudentEligibility'])->name('transactions.check-student');
+    Route::get('/transactions/check-book/{book}', [TransactionController::class, 'checkBookAvailability'])->name('transactions.check-book');
+
     // ===== PLACEHOLDER ROUTES =====
     // These routes will be implemented in future phases
-    // They are defined here to prevent errors in the sidebar navigation
-
-    // Transaction routes (Phase 3)
-    Route::get('/transactions/borrow', function () {
-        return redirect()->route('dashboard')->with('warning', 'Borrow functionality coming soon!');
-    })->name('transactions.borrow');
-
-    Route::get('/transactions/return', function () {
-        return redirect()->route('dashboard')->with('warning', 'Return functionality coming soon!');
-    })->name('transactions.return');
-
-    Route::get('/transactions', function () {
-        return redirect()->route('dashboard')->with('warning', 'Transaction history coming soon!');
-    })->name('transactions.index');
 
     // Reports routes (Phase 4)
     Route::get('/reports', function () {

@@ -666,14 +666,189 @@ All Phase 2 tasks have been completed:
 
 ---
 
+## Phase 3.1: Borrowing Functionality
+
+**Date:** January 2026
+**Status:** Completed
+
+### Features Implemented
+
+#### 1. Book Borrowing System
+Complete borrowing workflow with:
+- Multi-step Livewire form (Select Student → Select Book → Confirm → Success)
+- Real-time eligibility checking
+- Library rules enforcement (max books, overdue checks, unpaid fines)
+- Dynamic due date calculation
+- Receipt display on completion
+
+#### 2. Book Return System
+Complete return workflow with:
+- Search for borrowed books by student name, ID, or book title
+- Automatic fine calculation for overdue books
+- Book condition update on return
+- Option to pay fine at return time
+- Support for partial fine payments
+
+#### 3. Transaction History
+Comprehensive history view with:
+- Statistics cards (total, borrowed, overdue, returned today)
+- Advanced filtering (search, status, date range)
+- Paginated transaction table
+- Fine management actions (pay/waive)
+
+#### 4. Files Created
+
+| File | Type | Description |
+|------|------|-------------|
+| `app/Http/Controllers/TransactionController.php` | Controller | Borrow, return, history, and fine management |
+| `app/Http/Requests/BorrowRequest.php` | Form Request | Validation for borrowing transactions |
+| `app/Livewire/BorrowBookForm.php` | Livewire | Multi-step borrowing form component |
+| `app/Livewire/ReturnBookForm.php` | Livewire | Return and fine processing component |
+| `resources/views/livewire/borrow-book-form.blade.php` | View | Borrowing form UI |
+| `resources/views/livewire/return-book-form.blade.php` | View | Return form UI |
+| `resources/views/transactions/borrow.blade.php` | View | Borrow book page |
+| `resources/views/transactions/return.blade.php` | View | Return book page |
+| `resources/views/transactions/history.blade.php` | View | Transaction history page |
+
+#### 5. Files Modified
+
+| File | Changes |
+|------|---------|
+| `app/Services/BorrowingService.php` | Fixed Setting method calls (getInt instead of getValue) |
+| `app/Services/FineCalculationService.php` | Fixed Setting method calls (getFloat, getInt) |
+| `routes/web.php` | Added transaction routes, replaced placeholders |
+
+### TransactionController Methods
+
+| Method | Route | Description |
+|--------|-------|-------------|
+| `borrowIndex()` | GET /transactions/borrow | Show borrow form page |
+| `borrowStore()` | POST /transactions/borrow | Process borrowing (from controller) |
+| `returnIndex()` | GET /transactions/return | Show return form page |
+| `returnStore()` | POST /transactions/return | Process return (from controller) |
+| `history()` | GET /transactions | Transaction history with filters |
+| `payFine()` | POST /transactions/{id}/pay-fine | Mark fine as paid |
+| `waiveFine()` | POST /transactions/{id}/waive-fine | Waive fine (admin) |
+| `checkStudentEligibility()` | GET /transactions/check-student/{id} | API: Check student eligibility |
+| `checkBookAvailability()` | GET /transactions/check-book/{id} | API: Check book availability |
+
+### BorrowRequest Validation Rules
+
+| Field | Rules |
+|-------|-------|
+| student_id | required, exists in students |
+| book_id | required, exists in books, must be available |
+| due_date | required, date, after:today |
+
+### Livewire BorrowBookForm Component
+
+**Properties:**
+- `step` - Current form step (1-4)
+- `studentSearch` - Search term for students
+- `selectedStudentId` - Selected student's ID
+- `bookSearch` - Search term for books
+- `selectedBookId` - Selected book's ID
+- `dueDate` - Calculated due date
+- `transaction` - Completed transaction data
+
+**Computed Properties:**
+- `students` - Filtered student list
+- `selectedStudent` - Full student object
+- `studentEligibility` - Eligibility check result
+- `books` - Filtered available books
+- `selectedBook` - Full book object
+- `settings` - Library settings
+
+**Steps:**
+1. Select Student - Search and choose eligible student
+2. Select Book - Search and choose available book
+3. Confirm - Review details and set due date
+4. Success - Display receipt with transaction info
+
+### Livewire ReturnBookForm Component
+
+**Properties:**
+- `search` - Search term for borrowed books
+- `selectedTransactionId` - Selected transaction ID
+- `condition` - Book condition on return
+- `notes` - Return notes
+- `payFineNow` - Whether to pay fine on return
+
+**Computed Properties:**
+- `transactions` - List of borrowed transactions
+- `selectedTransaction` - Full transaction object
+- `calculatedFine` - Fine amount for selected transaction
+- `daysOverdue` - Days overdue count
+- `finePolicy` - Current fine settings
+- `overdueCount` - Total overdue books count
+
+**Features:**
+- Search by student name, student ID, or book title
+- Display overdue indicator with days count
+- Fine calculation preview before return
+- Condition update (excellent/good/fair/poor)
+- Optional immediate fine payment
+
+### Business Logic Enforced
+
+#### Borrowing Eligibility Checks
+1. **Max Books Limit**: Student cannot exceed max_books_per_student setting (default: 3)
+2. **No Overdue Books**: Student cannot borrow if they have overdue books
+3. **No Unpaid Fines**: Student cannot borrow if they have unpaid fines
+4. **Book Available**: Selected book must have available copies
+
+#### Fine Calculation Formula
+```
+grace_period = Setting::getInt('grace_period', 1)
+fine_per_day = Setting::getFloat('fine_per_day', 5.00)
+days_overdue = max(0, today - due_date)
+chargeable_days = max(0, days_overdue - grace_period)
+fine_amount = chargeable_days × fine_per_day
+```
+
+#### Default Library Settings
+- Max books per student: 3
+- Borrowing period: 7 days
+- Grace period: 1 day
+- Fine per day: ₱5.00
+
+### Transaction Routes
+
+| Route | Method | Controller@Action |
+|-------|--------|-------------------|
+| `/transactions/borrow` | GET | TransactionController@borrowIndex |
+| `/transactions/borrow` | POST | TransactionController@borrowStore |
+| `/transactions/return` | GET | TransactionController@returnIndex |
+| `/transactions/return` | POST | TransactionController@returnStore |
+| `/transactions` | GET | TransactionController@history |
+| `/transactions/history` | GET | TransactionController@history |
+| `/transactions/{id}/pay-fine` | POST | TransactionController@payFine |
+| `/transactions/{id}/waive-fine` | POST | TransactionController@waiveFine |
+| `/transactions/check-student/{id}` | GET | TransactionController@checkStudentEligibility |
+| `/transactions/check-book/{id}` | GET | TransactionController@checkBookAvailability |
+
+---
+
 ## Next Steps
 
-### Phase 3: Borrowing System
-- [ ] Create borrow book form with student/book search
-- [ ] Create return book form with fine calculation
-- [ ] Create transaction history view
-- [ ] Add overdue book notifications
-- [ ] Implement borrowing limits and validation
+### Phase 3.2: Enhanced Return & Fine Management
+- [ ] Fine payment history tracking
+- [ ] Bulk return processing
+- [ ] Email notifications for overdue books
+- [ ] Fine receipt printing
+
+### Phase 4: Reports
+- [ ] Daily transaction reports
+- [ ] Overdue books reports
+- [ ] Student borrowing history
+- [ ] Popular books report
+- [ ] Fine collection report
+
+### Phase 5: Administration
+- [ ] User management (add librarians)
+- [ ] Library settings management
+- [ ] System backup functionality
+- [ ] Audit log
 
 ---
 
