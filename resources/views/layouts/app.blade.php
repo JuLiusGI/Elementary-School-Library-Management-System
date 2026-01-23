@@ -391,5 +391,8 @@
 
         {{-- Livewire scripts for dynamic components --}}
         @livewireScripts
+
+        {{-- Page-specific scripts (e.g., Chart.js for reports) --}}
+        @stack('scripts')
     </body>
 </html>

@@ -1,0 +1,234 @@
+{{--
+    PDF Report Base Layout
+
+    Base template for all PDF reports.
+    Uses inline styles for DomPDF compatibility.
+
+    @author Library Management System
+--}}
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>{{ $report['title'] ?? 'Report' }}</title>
+    <style>
+        /* Reset and Base */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'DejaVu Sans', Arial, sans-serif;
+            font-size: 11px;
+            line-height: 1.4;
+            color: #333;
+        }
+
+        /* Header */
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #3B82F6;
+        }
+
+        .header h1 {
+            font-size: 18px;
+            color: #1f2937;
+            margin-bottom: 5px;
+        }
+
+        .header .school-name {
+            font-size: 14px;
+            color: #3B82F6;
+            font-weight: bold;
+            margin-bottom: 3px;
+        }
+
+        .header .subtitle {
+            font-size: 12px;
+            color: #6b7280;
+        }
+
+        /* Meta info */
+        .meta-info {
+            margin-bottom: 15px;
+            padding: 10px;
+            background-color: #f3f4f6;
+            border-radius: 4px;
+        }
+
+        .meta-info p {
+            font-size: 10px;
+            color: #6b7280;
+            margin: 2px 0;
+        }
+
+        /* Tables */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 15px;
+        }
+
+        table th {
+            background-color: #3B82F6;
+            color: white;
+            font-weight: bold;
+            text-align: left;
+            padding: 8px 10px;
+            font-size: 10px;
+            text-transform: uppercase;
+        }
+
+        table td {
+            padding: 8px 10px;
+            border-bottom: 1px solid #e5e7eb;
+            font-size: 10px;
+        }
+
+        table tr:nth-child(even) {
+            background-color: #f9fafb;
+        }
+
+        /* Section headers */
+        .section-header {
+            background-color: #1f2937;
+            color: white;
+            padding: 8px 12px;
+            font-size: 12px;
+            font-weight: bold;
+            margin: 15px 0 10px 0;
+        }
+
+        /* Summary cards */
+        .summary-row {
+            margin-bottom: 15px;
+        }
+
+        .summary-box {
+            display: inline-block;
+            width: 23%;
+            padding: 10px;
+            text-align: center;
+            background-color: #f3f4f6;
+            border-radius: 4px;
+            margin-right: 2%;
+        }
+
+        .summary-box:last-child {
+            margin-right: 0;
+        }
+
+        .summary-box .label {
+            font-size: 9px;
+            color: #6b7280;
+            text-transform: uppercase;
+        }
+
+        .summary-box .value {
+            font-size: 16px;
+            font-weight: bold;
+            color: #1f2937;
+        }
+
+        /* Status badges */
+        .badge {
+            display: inline-block;
+            padding: 2px 6px;
+            border-radius: 10px;
+            font-size: 9px;
+            font-weight: bold;
+        }
+
+        .badge-success {
+            background-color: #d1fae5;
+            color: #065f46;
+        }
+
+        .badge-warning {
+            background-color: #fef3c7;
+            color: #92400e;
+        }
+
+        .badge-danger {
+            background-color: #fee2e2;
+            color: #991b1b;
+        }
+
+        /* Footer */
+        .footer {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            text-align: center;
+            font-size: 9px;
+            color: #9ca3af;
+            padding: 10px;
+            border-top: 1px solid #e5e7eb;
+        }
+
+        /* Page break */
+        .page-break {
+            page-break-after: always;
+        }
+
+        /* Text utilities */
+        .text-right {
+            text-align: right;
+        }
+
+        .text-center {
+            text-align: center;
+        }
+
+        .text-bold {
+            font-weight: bold;
+        }
+
+        .text-muted {
+            color: #6b7280;
+        }
+
+        .text-danger {
+            color: #dc2626;
+        }
+
+        .text-success {
+            color: #059669;
+        }
+
+        /* Amount styling */
+        .amount {
+            font-family: monospace;
+            text-align: right;
+        }
+    </style>
+</head>
+<body>
+    {{-- Header --}}
+    <div class="header">
+        <div class="school-name">Bobon B Elementary School</div>
+        <div class="subtitle">Library Management System</div>
+        <h1>{{ $report['title'] }}</h1>
+        <div class="subtitle">{{ $report['description'] }}</div>
+    </div>
+
+    {{-- Meta Information --}}
+    <div class="meta-info">
+        <p><strong>Generated:</strong> {{ $report['generated_at'] }}</p>
+        <p><strong>Generated by:</strong> {{ $report['generated_by'] }}</p>
+    </div>
+
+    {{-- Report Content (Yielded from child views) --}}
+    @yield('content')
+
+    {{-- Footer --}}
+    <div class="footer">
+        Bobon B Elementary School Library Management System | Report generated on {{ $report['generated_at'] }}
+    </div>
+</body>
+</html>

@@ -20,6 +20,7 @@ use App\Http\Controllers\StudentController;
 use App\Http\Controllers\BookController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\TransactionController;
+use App\Http\Controllers\ReportController;
 use Illuminate\Support\Facades\Route;
 
 // =========================================================================
@@ -114,13 +115,25 @@ Route::middleware('auth')->group(function () {
     Route::get('/transactions/check-student/{student}', [TransactionController::class, 'checkStudentEligibility'])->name('transactions.check-student');
     Route::get('/transactions/check-book/{book}', [TransactionController::class, 'checkBookAvailability'])->name('transactions.check-book');
 
+    // ===== REPORTS ROUTES (Phase 4.1) =====
+    // Reports dashboard and individual reports
+
+    // Reports dashboard
+    Route::get('/reports', [ReportController::class, 'index'])->name('reports.index');
+
+    // Individual reports
+    Route::get('/reports/daily-transactions', [ReportController::class, 'dailyTransactions'])->name('reports.daily-transactions');
+    Route::get('/reports/overdue', [ReportController::class, 'overdueBooks'])->name('reports.overdue');
+    Route::get('/reports/most-borrowed', [ReportController::class, 'mostBorrowed'])->name('reports.most-borrowed');
+    Route::get('/reports/inventory', [ReportController::class, 'inventory'])->name('reports.inventory');
+    Route::get('/reports/monthly-stats', [ReportController::class, 'monthlyStats'])->name('reports.monthly-stats');
+
+    // Export routes
+    Route::get('/reports/export/pdf/{reportType}', [ReportController::class, 'exportPdf'])->name('reports.export.pdf');
+    Route::get('/reports/export/csv/{reportType}', [ReportController::class, 'exportCsv'])->name('reports.export.csv');
+
     // ===== PLACEHOLDER ROUTES =====
     // These routes will be implemented in future phases
-
-    // Reports routes (Phase 4)
-    Route::get('/reports', function () {
-        return redirect()->route('dashboard')->with('warning', 'Reports coming soon!');
-    })->name('reports.index');
 
     // Admin routes (Phase 5)
     Route::get('/settings', function () {

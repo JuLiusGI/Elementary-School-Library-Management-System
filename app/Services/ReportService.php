@@ -338,4 +338,265 @@ class ReportService
                 ->sum('fine_amount'),
         ];
     }
+
+    /**
+     * Get monthly statistics report
+     *
+     * Returns detailed statistics for a specific month including:
+     * - Total borrowed/returned books
+     * - Daily breakdown for charts
+     * - Top borrowers
+     * - Most popular books
+     * - Fine collection
+     *
+     * @param int $month The month (1-12)
+     * @param int $year The year (e.g., 2026)
+     * @return array Monthly statistics data
+     *
+     * @example
+     * $stats = $reportService->getMonthlyStatistics(1, 2026); // January 2026
+     */
+    public function getMonthlyStatistics(int $month, int $year): array
+    {
+        // Calculate date range for the month
+        $startDate = Carbon::createFromDate($year, $month, 1)->startOfMonth();
+        $endDate = Carbon::createFromDate($year, $month, 1)->endOfMonth();
+
+        // Total transactions in the month
+        $totalBorrowed = Transaction::whereBetween('borrowed_date', [$startDate, $endDate])->count();
+        $totalReturned = Transaction::whereBetween('returned_date', [$startDate, $endDate])->count();
+
+        // Daily breakdown for chart (borrowed books per day)
+        $dailyBorrowed = Transaction::whereBetween('borrowed_date', [$startDate, $endDate])
+            ->select(DB::raw('DATE(borrowed_date) as date'), DB::raw('COUNT(*) as count'))
+            ->groupBy('date')
+            ->orderBy('date')
+            ->get()
+            ->pluck('count', 'date')
+            ->toArray();
+
+        // Daily returned for chart
+        $dailyReturned = Transaction::whereBetween('returned_date', [$startDate, $endDate])
+            ->select(DB::raw('DATE(returned_date) as date'), DB::raw('COUNT(*) as count'))
+            ->groupBy('date')
+            ->orderBy('date')
+            ->get()
+            ->pluck('count', 'date')
+            ->toArray();
+
+        // Fill in missing dates with zeros
+        $period = new \DatePeriod($startDate, new \DateInterval('P1D'), $endDate->copy()->addDay());
+        $allDates = [];
+        foreach ($period as $date) {
+            $dateStr = $date->format('Y-m-d');
+            $allDates[$dateStr] = [
+                'borrowed' => $dailyBorrowed[$dateStr] ?? 0,
+                'returned' => $dailyReturned[$dateStr] ?? 0,
+            ];
+        }
+
+        // Top borrowers for the month
+        $topBorrowers = Transaction::whereBetween('borrowed_date', [$startDate, $endDate])
+            ->select('student_id', DB::raw('COUNT(*) as borrow_count'))
+            ->groupBy('student_id')
+            ->orderBy('borrow_count', 'desc')
+            ->limit(10)
+            ->with('student')
+            ->get();
+
+        // Most borrowed books this month
+        $topBooks = Transaction::whereBetween('borrowed_date', [$startDate, $endDate])
+            ->select('book_id', DB::raw('COUNT(*) as borrow_count'))
+            ->groupBy('book_id')
+            ->orderBy('borrow_count', 'desc')
+            ->limit(10)
+            ->with('book')
+            ->get();
+
+        // Borrowing by grade level
+        $byGradeLevel = Transaction::whereBetween('borrowed_date', [$startDate, $endDate])
+            ->join('students', 'transactions.student_id', '=', 'students.id')
+            ->select('students.grade_level', DB::raw('COUNT(*) as count'))
+            ->groupBy('students.grade_level')
+            ->orderBy('students.grade_level')
+            ->get()
+            ->pluck('count', 'grade_level')
+            ->toArray();
+
+        // Fine statistics for the month
+        $finesGenerated = Transaction::whereBetween('returned_date', [$startDate, $endDate])
+            ->where('fine_amount', '>', 0)
+            ->sum('fine_amount');
+
+        $finesCollected = Transaction::whereBetween('returned_date', [$startDate, $endDate])
+            ->where('fine_amount', '>', 0)
+            ->where('fine_paid', true)
+            ->sum('fine_amount');
+
+        // Unique borrowers
+        $uniqueBorrowers = Transaction::whereBetween('borrowed_date', [$startDate, $endDate])
+            ->distinct('student_id')
+            ->count('student_id');
+
+        // Overdue count for the month
+        $overdueCount = Transaction::whereBetween('borrowed_date', [$startDate, $endDate])
+            ->where(function ($q) use ($endDate) {
+                $q->where('status', 'overdue')
+                  ->orWhere(function ($sq) use ($endDate) {
+                      $sq->where('status', 'borrowed')
+                         ->where('due_date', '<', $endDate);
+                  });
+            })
+            ->count();
+
+        return [
+            'month' => $startDate->format('F'),
+            'year' => $year,
+            'period' => [
+                'start' => $startDate->format('F j, Y'),
+                'end' => $endDate->format('F j, Y'),
+            ],
+            'summary' => [
+                'total_borrowed' => $totalBorrowed,
+                'total_returned' => $totalReturned,
+                'unique_borrowers' => $uniqueBorrowers,
+                'overdue_count' => $overdueCount,
+                'fines_generated' => $finesGenerated,
+                'fines_collected' => $finesCollected,
+                'average_daily_borrows' => $endDate->day > 0
+                    ? round($totalBorrowed / $endDate->day, 1)
+                    : 0,
+            ],
+            'daily_breakdown' => $allDates,
+            'top_borrowers' => $topBorrowers,
+            'top_books' => $topBooks,
+            'by_grade_level' => $byGradeLevel,
+        ];
+    }
+
+    /**
+     * Get annual statistics report
+     *
+     * Returns statistics for a full year with monthly breakdown.
+     *
+     * @param int $year The year to report on
+     * @return array Annual statistics data
+     */
+    public function getAnnualStatistics(int $year): array
+    {
+        $monthlyData = [];
+
+        // Get stats for each month
+        for ($month = 1; $month <= 12; $month++) {
+            $startDate = Carbon::createFromDate($year, $month, 1)->startOfMonth();
+            $endDate = Carbon::createFromDate($year, $month, 1)->endOfMonth();
+
+            $borrowed = Transaction::whereBetween('borrowed_date', [$startDate, $endDate])->count();
+            $returned = Transaction::whereBetween('returned_date', [$startDate, $endDate])->count();
+            $fines = Transaction::whereBetween('returned_date', [$startDate, $endDate])
+                ->where('fine_paid', true)
+                ->sum('fine_amount');
+
+            $monthlyData[$startDate->format('M')] = [
+                'borrowed' => $borrowed,
+                'returned' => $returned,
+                'fines_collected' => $fines,
+            ];
+        }
+
+        // Annual totals
+        $yearStart = Carbon::createFromDate($year, 1, 1)->startOfYear();
+        $yearEnd = Carbon::createFromDate($year, 12, 31)->endOfYear();
+
+        $totalBorrowed = Transaction::whereBetween('borrowed_date', [$yearStart, $yearEnd])->count();
+        $totalReturned = Transaction::whereBetween('returned_date', [$yearStart, $yearEnd])->count();
+        $totalFines = Transaction::whereBetween('returned_date', [$yearStart, $yearEnd])
+            ->where('fine_paid', true)
+            ->sum('fine_amount');
+
+        return [
+            'year' => $year,
+            'monthly_breakdown' => $monthlyData,
+            'totals' => [
+                'borrowed' => $totalBorrowed,
+                'returned' => $totalReturned,
+                'fines_collected' => $totalFines,
+            ],
+        ];
+    }
+
+    /**
+     * Get report data formatted for PDF export
+     *
+     * Returns data with additional metadata needed for PDF generation.
+     *
+     * @param string $reportType The type of report
+     * @param array $params Report parameters
+     * @return array Report data with metadata
+     */
+    public function getReportForExport(string $reportType, array $params = []): array
+    {
+        $data = [];
+        $title = '';
+        $description = '';
+
+        switch ($reportType) {
+            case 'daily':
+                $date = isset($params['date']) ? Carbon::parse($params['date']) : Carbon::today();
+                $data = $this->getDailyTransactions($date);
+                $title = 'Daily Transactions Report';
+                $description = "Transactions for {$data['date']}";
+                break;
+
+            case 'overdue':
+                $data = ['transactions' => $this->getOverdueBooks()];
+                $title = 'Overdue Books Report';
+                $description = 'All currently overdue books as of ' . Carbon::now()->format('F j, Y');
+                break;
+
+            case 'most-borrowed':
+                $startDate = isset($params['start_date']) ? Carbon::parse($params['start_date']) : null;
+                $endDate = isset($params['end_date']) ? Carbon::parse($params['end_date']) : null;
+                $limit = $params['limit'] ?? 10;
+                $data = ['books' => $this->getMostBorrowedBooks($limit, $startDate, $endDate)];
+                $title = 'Most Borrowed Books Report';
+                $description = $startDate && $endDate
+                    ? "Top {$limit} books from {$startDate->format('M j, Y')} to {$endDate->format('M j, Y')}"
+                    : "Top {$limit} most borrowed books (all time)";
+                break;
+
+            case 'inventory':
+                $data = $this->getInventoryReport();
+                $title = 'Inventory Report';
+                $description = 'Library inventory status as of ' . Carbon::now()->format('F j, Y');
+                break;
+
+            case 'monthly':
+                $month = $params['month'] ?? Carbon::now()->month;
+                $year = $params['year'] ?? Carbon::now()->year;
+                $data = $this->getMonthlyStatistics($month, $year);
+                $title = 'Monthly Statistics Report';
+                $description = "{$data['month']} {$year}";
+                break;
+
+            case 'students-with-fines':
+                $data = ['students' => $this->getStudentsWithFines()];
+                $title = 'Students with Unpaid Fines';
+                $description = 'As of ' . Carbon::now()->format('F j, Y');
+                break;
+
+            default:
+                $data = [];
+                $title = 'Report';
+                $description = '';
+        }
+
+        return [
+            'title' => $title,
+            'description' => $description,
+            'generated_at' => Carbon::now()->format('F j, Y h:i A'),
+            'generated_by' => auth()->user()->name ?? 'System',
+            'data' => $data,
+        ];
+    }
 }
