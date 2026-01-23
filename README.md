@@ -431,10 +431,18 @@ This project is developed for Bobon B Elementary School. All rights reserved.
 - Fine payment and waiver functionality
 - Real-time search for borrowed books
 
-#### Phase 3.2 - Pending
-- Enhanced fine management features
-- Bulk return processing
-- Overdue notifications
+#### Phase 3.2 - Completed (January 2026)
+- Fine management dashboard with statistics
+- Detailed fine calculation breakdown display
+- Payment recording with method tracking (cash, GCash, Maya, bank)
+- Fine waiver functionality (admin only)
+- Scheduled task for automatic overdue updates
+- Enhanced return interface with fine preview
+- Sidebar navigation updated with Fines link
+
+#### Phase 4 - Pending
+- Reports (daily transactions, overdue books, popular books)
+- PDF export functionality
 
 ---
 

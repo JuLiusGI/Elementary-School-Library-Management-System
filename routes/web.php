@@ -104,8 +104,11 @@ Route::middleware('auth')->group(function () {
     Route::get('/transactions/history', [TransactionController::class, 'history'])->name('transactions.history');
 
     // Fine management routes
+    Route::get('/transactions/fines', [TransactionController::class, 'fineIndex'])->name('transactions.fines');
     Route::post('/transactions/{transaction}/pay-fine', [TransactionController::class, 'payFine'])->name('transactions.pay-fine');
+    Route::post('/transactions/{transaction}/record-payment', [TransactionController::class, 'recordPayment'])->name('transactions.record-payment');
     Route::post('/transactions/{transaction}/waive-fine', [TransactionController::class, 'waiveFine'])->name('transactions.waive-fine');
+    Route::get('/transactions/{transaction}/fine-breakdown', [TransactionController::class, 'getFineBreakdown'])->name('transactions.fine-breakdown');
 
     // API-style routes for Livewire components
     Route::get('/transactions/check-student/{student}', [TransactionController::class, 'checkStudentEligibility'])->name('transactions.check-student');

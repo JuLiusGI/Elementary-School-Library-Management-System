@@ -829,13 +829,132 @@ fine_amount = chargeable_days × fine_per_day
 
 ---
 
-## Next Steps
+## Phase 3.2: Return & Fine Management
 
-### Phase 3.2: Enhanced Return & Fine Management
-- [ ] Fine payment history tracking
-- [ ] Bulk return processing
-- [ ] Email notifications for overdue books
-- [ ] Fine receipt printing
+**Date:** January 2026
+**Status:** Completed
+
+### Features Implemented
+
+#### 1. Fine Management System
+Complete fine management interface with:
+- Statistics dashboard (total unpaid, collected, pending, students with fines)
+- Searchable/filterable fines table
+- Payment recording (full and partial)
+- Fine waiver functionality (admin only)
+- Detailed fine calculation breakdown view
+
+#### 2. Enhanced FineCalculationService
+New methods added:
+- `recordPayment()` - Record payments with method tracking
+- `getFineBreakdown()` - Detailed calculation breakdown
+- `getUnpaidFines()` - Get all unpaid fines with filters
+- `getFineStatistics()` - System-wide fine statistics
+
+#### 3. Scheduled Task for Overdue Updates
+Automated daily task that:
+- Checks all borrowed transactions
+- Updates status to 'overdue' for past-due transactions
+- Supports dry-run mode for testing
+- Logs updates for auditing
+
+#### 4. Enhanced Return Interface
+Improved return form with:
+- Detailed fine calculation breakdown
+- Visual formula display
+- Grace period indicator
+- Immediate payment option
+
+#### 5. Files Created
+
+| File | Type | Description |
+|------|------|-------------|
+| `app/Livewire/FineManagement.php` | Livewire | Fine management component |
+| `resources/views/livewire/fine-management.blade.php` | View | Fine management UI |
+| `resources/views/transactions/fines.blade.php` | View | Fines page layout |
+| `app/Console/Commands/UpdateOverdueTransactions.php` | Command | Scheduled task for overdue updates |
+
+#### 6. Files Modified
+
+| File | Changes |
+|------|---------|
+| `app/Services/FineCalculationService.php` | Added recordPayment, getFineBreakdown, getUnpaidFines, getFineStatistics methods |
+| `app/Http/Controllers/TransactionController.php` | Added fineIndex, recordPayment, getFineBreakdown methods |
+| `app/Livewire/ReturnBookForm.php` | Added fineBreakdown computed property |
+| `resources/views/livewire/return-book-form.blade.php` | Enhanced fine display with breakdown |
+| `resources/views/layouts/app.blade.php` | Added Fines link to sidebar navigation |
+| `routes/web.php` | Added fine management routes |
+| `routes/console.php` | Added scheduled task for overdue updates |
+
+### FineManagement Livewire Component
+
+**Properties:**
+- `search` - Search term for filtering fines
+- `statusFilter` - Filter by paid/unpaid/all
+- `sortField` - Current sort field
+- `sortDirection` - Sort direction (asc/desc)
+- `selectedTransactionId` - Selected transaction for modals
+- `paymentAmount` - Payment amount input
+- `paymentMethod` - Payment method selection
+- `waiveReason` - Reason for waiving fine
+
+**Computed Properties:**
+- `fines` - Paginated fines list
+- `selectedTransaction` - Selected transaction object
+- `statistics` - Fine statistics
+- `studentsWithFines` - Top students with unpaid fines
+
+**Actions:**
+- `openPaymentModal()` - Show payment modal
+- `processPayment()` - Record payment
+- `quickPay()` - Mark fine as fully paid
+- `openWaiveModal()` - Show waive modal (admin)
+- `processWaive()` - Waive fine
+- `showBreakdown()` - Show fine calculation breakdown
+
+### New Routes (Phase 3.2)
+
+| Route | Method | Controller@Action |
+|-------|--------|-------------------|
+| `/transactions/fines` | GET | TransactionController@fineIndex |
+| `/transactions/{id}/record-payment` | POST | TransactionController@recordPayment |
+| `/transactions/{id}/fine-breakdown` | GET | TransactionController@getFineBreakdown |
+
+### Scheduled Command
+
+**Command:** `php artisan transactions:update-overdue`
+
+**Options:**
+- `--dry-run` - Show what would be updated without making changes
+
+**Schedule:** Daily at midnight
+
+**Setup:** Add cron entry:
+```bash
+* * * * * cd /path-to-project && php artisan schedule:run >> /dev/null 2>&1
+```
+
+### Fine Breakdown Display
+
+The fine breakdown shows:
+- Due date and return date
+- Days overdue
+- Grace period applied
+- Chargeable days calculation
+- Fine per day rate
+- Formula: `(days_overdue - grace_period) × fine_per_day = total_fine`
+
+---
+
+## Phase 3 Complete
+
+All Phase 3 tasks have been completed:
+- [x] Phase 3.1: Borrowing Functionality
+- [x] Phase 3.2: Return & Fine Management
+
+---
+
+## Next Steps
 
 ### Phase 4: Reports
 - [ ] Daily transaction reports
@@ -843,6 +962,7 @@ fine_amount = chargeable_days × fine_per_day
 - [ ] Student borrowing history
 - [ ] Popular books report
 - [ ] Fine collection report
+- [ ] PDF export functionality
 
 ### Phase 5: Administration
 - [ ] User management (add librarians)

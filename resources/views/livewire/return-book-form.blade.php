@@ -193,29 +193,74 @@
                             </dl>
                         </div>
 
-                        {{-- Fine Calculation --}}
-                        @if ($this->calculatedFine > 0)
-                            <div class="mb-4 p-3 bg-danger-50 rounded-lg">
-                                <div class="flex justify-between items-center">
-                                    <span class="text-sm font-medium text-danger-800">Fine Amount</span>
-                                    <span class="text-lg font-bold text-danger-600">₱{{ number_format($this->calculatedFine, 2) }}</span>
+                        {{-- Fine Calculation with Detailed Breakdown --}}
+                        @if ($this->calculatedFine > 0 && !empty($this->fineBreakdown))
+                            <div class="mb-4 rounded-lg border border-danger-200 overflow-hidden">
+                                {{-- Header --}}
+                                <div class="bg-danger-50 px-3 py-2 border-b border-danger-200">
+                                    <div class="flex justify-between items-center">
+                                        <span class="text-sm font-semibold text-danger-800">Fine Due</span>
+                                        <span class="text-lg font-bold text-danger-600">₱{{ number_format($this->calculatedFine, 2) }}</span>
+                                    </div>
                                 </div>
-                                <p class="text-xs text-danger-600 mt-1">
-                                    {{ $this->daysOverdue }} days overdue - {{ $this->finePolicy['grace_period'] }} day grace =
-                                    {{ max(0, $this->daysOverdue - $this->finePolicy['grace_period']) }} × ₱{{ number_format($this->finePolicy['fine_per_day'], 2) }}
-                                </p>
+
+                                {{-- Breakdown Details --}}
+                                <div class="bg-white px-3 py-3 space-y-2">
+                                    <div class="flex justify-between text-sm">
+                                        <span class="text-gray-600">Days Overdue:</span>
+                                        <span class="font-medium text-danger-600">{{ $this->fineBreakdown['days_overdue'] }} days</span>
+                                    </div>
+                                    <div class="flex justify-between text-sm">
+                                        <span class="text-gray-600">Grace Period:</span>
+                                        <span class="font-medium text-success-600">- {{ $this->fineBreakdown['grace_period'] }} day(s)</span>
+                                    </div>
+                                    <hr class="border-gray-200">
+                                    <div class="flex justify-between text-sm">
+                                        <span class="text-gray-600">Chargeable Days:</span>
+                                        <span class="font-medium text-gray-900">{{ $this->fineBreakdown['chargeable_days'] }} days</span>
+                                    </div>
+                                    <div class="flex justify-between text-sm">
+                                        <span class="text-gray-600">Rate per Day:</span>
+                                        <span class="font-medium text-gray-900">₱{{ number_format($this->fineBreakdown['fine_per_day'], 2) }}</span>
+                                    </div>
+                                </div>
+
+                                {{-- Formula --}}
+                                <div class="bg-gray-50 px-3 py-2 border-t border-gray-200">
+                                    <p class="text-xs text-gray-600 font-mono">
+                                        {{ $this->fineBreakdown['formula'] }}
+                                    </p>
+                                </div>
                             </div>
 
                             {{-- Pay Fine Now Option --}}
                             <div class="mb-4">
-                                <label class="flex items-center">
+                                <label class="flex items-center cursor-pointer">
                                     <input
                                         wire:model="payFineNow"
                                         type="checkbox"
-                                        class="rounded border-gray-300 text-primary-600 shadow-sm focus:ring-primary-500"
+                                        class="rounded border-gray-300 text-success-600 shadow-sm focus:ring-success-500"
                                     >
                                     <span class="ml-2 text-sm text-gray-600">Mark fine as paid now</span>
                                 </label>
+                                @if($payFineNow)
+                                    <p class="mt-1 ml-6 text-xs text-success-600">Fine will be recorded as paid upon return.</p>
+                                @endif
+                            </div>
+                        @elseif ($this->daysOverdue > 0 && $this->calculatedFine == 0)
+                            {{-- Within Grace Period --}}
+                            <div class="mb-4 p-3 bg-success-50 rounded-lg border border-success-200">
+                                <div class="flex items-start">
+                                    <svg class="h-5 w-5 text-success-400 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.857-9.809a.75.75 0 00-1.214-.882l-3.483 4.79-1.88-1.88a.75.75 0 10-1.06 1.061l2.5 2.5a.75.75 0 001.137-.089l4-5.5z" clip-rule="evenodd" />
+                                    </svg>
+                                    <div class="ml-3">
+                                        <p class="text-sm font-medium text-success-800">Within Grace Period</p>
+                                        <p class="text-xs text-success-700 mt-1">
+                                            Book is {{ $this->daysOverdue }} day(s) overdue but within the {{ $this->finePolicy['grace_period'] }} day grace period. No fine will be charged.
+                                        </p>
+                                    </div>
+                                </div>
                             </div>
                         @endif
 
