@@ -1121,13 +1121,139 @@ All Phase 4.1 tasks have been completed:
 
 ---
 
-## Next Steps
+## Phase 4.2: System Settings
 
-### Phase 4.2: System Settings
-- [ ] Settings management interface
-- [ ] Library configuration (max books, borrowing period, etc.)
-- [ ] Fine settings management
-- [ ] School information settings
+**Date:** January 2026
+**Status:** Completed
+
+### Features Implemented
+
+#### 1. Settings Management Interface
+Comprehensive settings page with:
+- Grouped settings by category (School, Circulation, Fines, System)
+- Form validation with error messages
+- Reset to defaults functionality with confirmation
+- Admin-only access via middleware
+
+#### 2. Setting Categories
+
+**School Information:**
+- School name
+- School address
+- Library name
+- Library hours
+- Library email
+- Library phone
+
+**Circulation Rules:**
+- Maximum books per student (1-10)
+- Borrowing period (1-30 days)
+- Allow renewals toggle
+- Maximum renewals (0-5)
+
+**Fine Configuration:**
+- Fine per day (P0-100)
+- Grace period (0-7 days)
+- Maximum fine amount (P0-1000)
+
+**System Preferences:**
+- Date format selection
+- Items per page
+- Email notifications toggle
+
+#### 3. Files Created
+
+| File | Type | Description |
+|------|------|-------------|
+| `app/Services/SettingService.php` | Service | Settings management with defaults |
+| `app/Http/Controllers/SettingController.php` | Controller | Settings CRUD operations |
+| `app/Http/Requests/SettingRequest.php` | Form Request | Settings validation rules |
+| `app/Http/Middleware/AdminMiddleware.php` | Middleware | Admin-only access control |
+| `database/seeders/SettingSeeder.php` | Seeder | Default settings data |
+| `resources/views/settings/index.blade.php` | View | Settings form UI |
+
+#### 4. Files Modified
+
+| File | Changes |
+|------|---------|
+| `routes/web.php` | Added settings routes with admin middleware |
+| `bootstrap/app.php` | Registered admin middleware alias |
+
+### SettingService Methods
+
+| Method | Description |
+|--------|-------------|
+| `get($key, $default)` | Get a setting value |
+| `set($key, $value)` | Set a setting value |
+| `getAll()` | Get all settings as array |
+| `getAllWithMetadata()` | Get settings with descriptions and types |
+| `getGroupedSettings()` | Get settings grouped by category |
+| `updateMany($settings)` | Update multiple settings at once |
+| `resetDefaults()` | Reset all settings to defaults |
+| `isValidKey($key)` | Check if setting key is valid |
+
+### SettingController Methods
+
+| Method | Route | Description |
+|--------|-------|-------------|
+| `index()` | GET /settings | Show settings form |
+| `update()` | PUT /settings | Save settings |
+| `reset()` | POST /settings/reset | Reset to defaults |
+
+### SettingRequest Validation
+
+| Field | Rules |
+|-------|-------|
+| `max_books_per_student` | required, integer, 1-10 |
+| `borrowing_period` | required, integer, 1-30 |
+| `fine_per_day` | required, numeric, 0-100 |
+| `grace_period` | required, integer, 0-7 |
+| `max_fine_amount` | required, numeric, 0-1000 |
+| `school_name` | required, string, max:255 |
+| `library_email` | nullable, email |
+| `date_format` | required, in predefined formats |
+| `items_per_page` | required, integer, 5-100 |
+
+### Admin Middleware
+
+The `admin` middleware restricts settings access:
+- Checks if user is authenticated
+- Checks if user role is 'admin'
+- Redirects non-admins to dashboard with error message
+
+Usage in routes:
+```php
+Route::middleware('admin')->group(function () {
+    Route::get('/settings', [SettingController::class, 'index']);
+});
+```
+
+### Settings Routes
+
+| Route | Method | Middleware | Description |
+|-------|--------|------------|-------------|
+| `/settings` | GET | auth, admin | Show settings form |
+| `/settings` | PUT | auth, admin | Update settings |
+| `/settings/reset` | POST | auth, admin | Reset to defaults |
+
+### Seeding Settings
+
+Run the seeder to populate default settings:
+```bash
+php artisan db:seed --class=SettingSeeder
+```
+
+---
+
+## Phase 4 Complete
+
+All Phase 4 tasks have been completed:
+- [x] Phase 4.1: Reports & Analytics
+- [x] Phase 4.2: System Settings
+
+---
+
+## Next Steps
 
 ### Phase 5: Administration
 - [ ] User management (add librarians)

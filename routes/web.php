@@ -21,6 +21,7 @@ use App\Http\Controllers\BookController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\TransactionController;
 use App\Http\Controllers\ReportController;
+use App\Http\Controllers\SettingController;
 use Illuminate\Support\Facades\Route;
 
 // =========================================================================
@@ -132,14 +133,18 @@ Route::middleware('auth')->group(function () {
     Route::get('/reports/export/pdf/{reportType}', [ReportController::class, 'exportPdf'])->name('reports.export.pdf');
     Route::get('/reports/export/csv/{reportType}', [ReportController::class, 'exportCsv'])->name('reports.export.csv');
 
+    // ===== SETTINGS ROUTES (Phase 4.2) =====
+    // System settings management (Admin only)
+    Route::middleware('admin')->group(function () {
+        Route::get('/settings', [SettingController::class, 'index'])->name('settings.index');
+        Route::put('/settings', [SettingController::class, 'update'])->name('settings.update');
+        Route::post('/settings/reset', [SettingController::class, 'reset'])->name('settings.reset');
+    });
+
     // ===== PLACEHOLDER ROUTES =====
     // These routes will be implemented in future phases
 
     // Admin routes (Phase 5)
-    Route::get('/settings', function () {
-        return redirect()->route('dashboard')->with('warning', 'Settings coming soon!');
-    })->name('settings.index');
-
     Route::get('/users', function () {
         return redirect()->route('dashboard')->with('warning', 'User management coming soon!');
     })->name('users.index');
