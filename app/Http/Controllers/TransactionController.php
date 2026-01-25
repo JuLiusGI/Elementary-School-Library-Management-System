@@ -297,6 +297,29 @@ class TransactionController extends Controller
     // =========================================================================
 
     /**
+     * Display the fines management page.
+     *
+     * Shows all students with fines, with options to:
+     * - View unpaid fines
+     * - View paid fines
+     * - Record payments
+     * - Waive fines (admin only)
+     *
+     * @param Request $request Contains optional filter parameters
+     * @return \Illuminate\View\View
+     */
+    public function fineIndex(Request $request): View
+    {
+        // Get fine statistics
+        $statistics = $this->fineService->getFineStatistics();
+
+        // Get fine policy for display
+        $finePolicy = $this->fineService->getFinePolicy();
+
+        return view('transactions.fines', compact('statistics', 'finePolicy'));
+    }
+
+    /**
      * Mark a fine as paid.
      *
      * Updates the transaction to indicate the fine has been settled.
@@ -320,6 +343,37 @@ class TransactionController extends Controller
         $this->fineService->markFinePaid($transaction);
 
         return back()->with('success', "Fine of ₱" . number_format($transaction->fine_amount, 2) . " has been marked as paid.");
+    }
+
+    /**
+     * Record a payment for a fine.
+     *
+     * Allows recording partial or full payment with payment method.
+     *
+     * @param Request $request Contains amount and optional payment_method
+     * @param Transaction $transaction The transaction with the fine
+     * @return \Illuminate\Http\RedirectResponse
+     */
+    public function recordPayment(Request $request, Transaction $transaction): RedirectResponse
+    {
+        // Validate the request
+        $validated = $request->validate([
+            'amount' => 'required|numeric|min:0.01',
+            'payment_method' => 'nullable|string|in:cash,gcash,maya,bank_transfer',
+        ]);
+
+        // Record the payment
+        $result = $this->fineService->recordPayment(
+            $transaction,
+            $validated['amount'],
+            $validated['payment_method'] ?? 'cash'
+        );
+
+        if ($result['success']) {
+            return back()->with('success', $result['message']);
+        }
+
+        return back()->with('error', $result['message']);
     }
 
     /**
@@ -347,6 +401,22 @@ class TransactionController extends Controller
         $this->fineService->waiveFine($transaction, $validated['reason']);
 
         return back()->with('success', 'Fine has been waived successfully.');
+    }
+
+    /**
+     * Get fine breakdown for a transaction (API).
+     *
+     * Returns detailed breakdown of fine calculation.
+     * Used by Livewire components for display.
+     *
+     * @param Transaction $transaction The transaction to get breakdown for
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function getFineBreakdown(Transaction $transaction)
+    {
+        $breakdown = $this->fineService->getFineBreakdown($transaction);
+
+        return response()->json($breakdown);
     }
 
     // =========================================================================

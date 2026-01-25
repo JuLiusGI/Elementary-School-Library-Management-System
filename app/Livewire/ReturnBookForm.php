@@ -194,6 +194,30 @@ class ReturnBookForm extends Component
     }
 
     /**
+     * Get detailed fine breakdown for the selected transaction.
+     *
+     * Returns a comprehensive breakdown showing:
+     * - Due date and return date
+     * - Days overdue
+     * - Grace period applied
+     * - Chargeable days
+     * - Fine per day rate
+     * - Total fine calculated
+     * - Formula used
+     *
+     * @return array
+     */
+    public function getFineBreakdownProperty(): array
+    {
+        if (!$this->selectedTransaction) {
+            return [];
+        }
+
+        $fineService = new FineCalculationService();
+        return $fineService->getFineBreakdown($this->selectedTransaction);
+    }
+
+    /**
      * Get overdue transactions count for alert.
      *
      * @return int
