@@ -15,6 +15,7 @@
  * @see App\Providers\RouteServiceProvider
  */
 
+use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\StudentController;
 use App\Http\Controllers\BookController;
@@ -42,10 +43,19 @@ Route::get('/', function () {
 /**
  * Dashboard - Main landing page after login
  * Requires authentication and email verification
+ *
+ * The dashboard displays:
+ * - Statistics cards (total books, available, students, borrowed)
+ * - Recent transactions
+ * - Overdue alerts and low stock warnings
+ * - Charts for visual data representation
+ * - Quick action buttons
+ *
+ * @see App\Http\Controllers\DashboardController
  */
-Route::get('/dashboard', function () {
-    return view('dashboard');
-})->middleware(['auth', 'verified'])->name('dashboard');
+Route::get('/dashboard', [DashboardController::class, 'index'])
+    ->middleware(['auth', 'verified'])
+    ->name('dashboard');
 
 /**
  * Authenticated routes group

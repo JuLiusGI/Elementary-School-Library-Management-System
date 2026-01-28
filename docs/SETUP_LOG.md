@@ -1253,9 +1253,146 @@ All Phase 4 tasks have been completed:
 
 ---
 
+## Phase 5.1: Main Dashboard
+
+**Date:** January 2026
+**Status:** Completed
+
+### Overview
+
+Created an informative and functional dashboard with real-time statistics,
+charts, alerts, and quick action buttons.
+
+### Files Created
+
+#### 1. DashboardController
+
+**File:** `app/Http/Controllers/DashboardController.php`
+
+Handles the main dashboard page with methods for:
+- Gathering statistics (books, students, transactions)
+- Recent transactions (last 10)
+- Overdue book alerts
+- Low stock books (copies_available < 2)
+- Charts data (category distribution, weekly trend, top borrowed)
+
+| Method | Description |
+|--------|-------------|
+| `index()` | Main dashboard view with all data |
+| `getStatistics()` | Statistics for dashboard cards |
+| `getRecentTransactions()` | Last 10 transactions |
+| `getOverdueBooks()` | Overdue book alerts |
+| `getLowStockBooks()` | Books with < 2 copies available |
+| `getBooksByCategory()` | Data for pie chart |
+| `getWeeklyBorrowingTrend()` | Last 7 days activity |
+| `getTopBorrowedBooksThisMonth()` | Top 5 popular books |
+
+#### 2. Livewire DashboardStats Component
+
+**File:** `app/Livewire/DashboardStats.php`
+
+Real-time statistics component with auto-refresh:
+- Auto-refresh every 60 seconds using `wire:poll`
+- Statistics cards with icons and color-coding
+- Overdue alerts section
+- Low stock warnings
+- Recent transactions table
+
+Features:
+- Manual refresh button
+- Last refresh timestamp display
+- Computed properties for data optimization
+
+#### 3. Dashboard View
+
+**File:** `resources/views/dashboard/index.blade.php`
+
+Main dashboard view with sections:
+- Welcome header with user name and date/time
+- Quick action buttons (Borrow, Return)
+- Livewire statistics component
+- Three charts (Weekly Activity, Books by Category, Top Borrowed)
+- Quick access cards for common tasks
+
+#### 4. Livewire Dashboard Stats View
+
+**File:** `resources/views/livewire/dashboard-stats.blade.php`
+
+Livewire component view with:
+- Auto-refresh wrapper
+- Statistics cards grid (4 cards)
+- Today's activity summary
+- Overdue books alert box
+- Low stock books warning
+- Recent transactions table
+
+### Dashboard Features
+
+#### Statistics Cards
+
+| Card | Icon | Color | Data |
+|------|------|-------|------|
+| Total Books | Book | Primary Blue | Book titles + copies |
+| Available | Check | Success Green | Available copies + percentage |
+| Active Students | Users | Warning Yellow | Active students count |
+| Borrowed | Clipboard | Danger Red | Currently borrowed + overdue |
+
+#### Charts
+
+1. **Weekly Activity (Line Chart)**
+   - Shows borrowing and return trends
+   - Last 7 days data
+   - Two datasets: borrowed and returned
+
+2. **Books by Category (Doughnut Chart)**
+   - Distribution of books across categories
+   - Color-coded segments
+   - Legend with category names
+
+3. **Top Borrowed This Month (Bar Chart)**
+   - Top 5 most borrowed books
+   - Horizontal bar chart
+   - Color-coded bars
+
+#### Quick Action Cards
+
+| Card | Icon | Color | Link |
+|------|------|-------|------|
+| Add New Book | Book | Primary | books.create |
+| Add Student | User+ | Success | students.create |
+| View Reports | Chart | Warning | reports.index |
+| Manage Fines | Money | Danger | transactions.fines |
+
+### Routes Updated
+
+| Route | Controller | Method | Description |
+|-------|------------|--------|-------------|
+| `/dashboard` | DashboardController | index | Main dashboard |
+
+### Auto-Refresh Feature
+
+The dashboard uses Livewire's polling feature:
+```blade
+<div wire:poll.60s="refresh">
+    <!-- Stats content -->
+</div>
+```
+
+This automatically refreshes statistics every 60 seconds without
+requiring a full page reload.
+
+---
+
 ## Next Steps
 
-### Phase 5: Administration
+### Phase 5.2: UI Polish & Final Touches
+- [ ] Consistent styling across all pages
+- [ ] Loading states and animations
+- [ ] Mobile responsiveness review
+- [ ] Flash message improvements
+- [ ] Final testing of all features
+
+### Phase 6: User Management (Future)
 - [ ] User management (add librarians)
 - [ ] Role-based access control
 - [ ] Audit log
