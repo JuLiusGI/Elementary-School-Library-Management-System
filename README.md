@@ -203,8 +203,9 @@ After seeding the database, use these credentials to log in:
 
 | Role | Email | Password |
 |------|-------|----------|
-| Admin | admin@library.com | password |
-| Librarian | librarian@library.com | password |
+| Admin | admin@bobon.edu.ph | password |
+| Librarian | librarian1@bobon.edu.ph | password |
+| Librarian | librarian2@bobon.edu.ph | password |
 
 > **Important**: Change these passwords immediately after first login in a production environment!
 
@@ -483,8 +484,18 @@ This project is developed for Bobon B Elementary School. All rights reserved.
 - Improved flash message animations
 - Mobile responsiveness improvements
 
-#### Phase 6 - Pending
-- User management and role-based access
+#### Phase 6.1 - Completed (January 2026)
+- Model factories: StudentFactory, BookFactory, TransactionFactory
+- UserSeeder: 1 admin (admin@bobon.edu.ph) + 2 librarians
+- CategorySeeder: 11 categories (Fiction, Science, Filipino Literature, etc.)
+- StudentSeeder: 50 students using factory (Grades 1-6, Sections A/B/C)
+- BookSeeder: 100 books using factory (distributed across categories)
+- TransactionSeeder: 85 transactions (30 active, 50 returned, 5 overdue)
+- DatabaseSeeder orchestrating all seeders in correct order
+
+#### Phase 6.2 - Pending
+- User guide documentation
+- Final testing and review
 
 ---
 
