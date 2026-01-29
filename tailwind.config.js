@@ -17,6 +17,13 @@ import forms from '@tailwindcss/forms';
 
 /** @type {import('tailwindcss').Config} */
 export default {
+    /**
+     * Dark mode configuration
+     * Using 'class' strategy so we can toggle dark mode via Alpine.js
+     * The dark mode is toggled by adding/removing 'dark' class on <html> element
+     */
+    darkMode: 'class',
+
     content: [
         './vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php',
         './storage/framework/views/*.php',
